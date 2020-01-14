@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Down The Tubes</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <header>
+        <h1>DOWN THE TUBES</h1>
+        <img class="logo" src="images/escalator-into-tube.png" alt="person taking escalator into vertical tube">
+    </header>
+    <main>
+        
+        <p>As the "great" US Senator Ted Stevens once said about the internet, "It's a series of tubes." Indeed. Sometimes we post YouTube videos online and forget about them. This site aims to help you remember them. So, enjoy a walk, <i>Down The Tubes</i>.</p>
+        <form id="js-search-form">
+            <label for="js-search-name">Enter a blog URL:</label>
+            <br>
+            <input id="js-search-name" class="search-name" type="text" value="https://camsbrain.blogspot.com/" required />
+            <br>
+            <br>
+            <!-- <label for="js-platform">Select Blog Host:</label>
+            <br>
+            <select id="js-platform">
+                <option value="blogger">Blogger</option>
+                <option value="wordpress">Wordpress</option>
+            </select>
+            <br> -->
+            <label for="js-max-results">Max Results</label>
+            <br>
+            <input id="js-max-results" type="number" value="10" required />
+            <br>
+            <br>
+            <input id="js-search" type="submit" value="Find Videos">
+        </form>
+        <section id="js-error-container">
+            <p id="js-error-message" class="error-message"></p>
+        </section>
+        <section id="js-search-results" class="search-results hidden">
+            <h2>Search Results</h2>
+            <p id="js-item-count" class="item-count"></p>
+            <p>PLAYLIST HERE</p>
+            <ol id="js-search-results-list" class="search-results-list">
+            </ol>
+
+        </section>
+        <footer>
+            <div class="footer-container">
+                <a href="">NEW</a>
+                <a href="">SORT</a>
+                <a href="">SHARE</a>
+            </div>
+        </footer>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="index.js"></script>
+</body>
+</html>
