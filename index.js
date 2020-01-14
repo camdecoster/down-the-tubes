@@ -39,7 +39,7 @@ function formatQueryParameters(queryParameters) {
 }
 
 // Call selected site API to get post history for searchName
-async function getPosts(searchName, platform) {
+async function getPosts(searchName) {
     console.log('`getPosts` ran')
     let posts;
 
@@ -51,13 +51,13 @@ async function getPosts(searchName, platform) {
 
     // Create parameters for API query
     const queryParameters = {};
-    if (platform === 'blogger') {
+    if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {
         // queryParameters.url = searchName;
         // queryParameters.key = apiKeyBlogger;
         // apiUrl = apiUrlBlogger.url + apiUrlBlogger.blogSearch;
         posts = await getBloggerPosts(searchName);
     }
-    else if (platform === 'wordpress') {
+    else if (searchName.search('wordpress.com') > -1) {
         
     }
     return posts;
@@ -277,10 +277,10 @@ function watchForm() {
         event.preventDefault();
 
         const searchName = $('#js-search-name').val();
-        const platform = $('#js-platform').val();
+        // const platform = $('#js-platform').val();
         //console.log(platform, platform === 'Blogger');
         
-        const posts = await getPosts(searchName, platform);
+        const posts = await getPosts(searchName);
         // console.log(posts);
         const videoIds = parseYoutubeLinks(posts);
         // console.log(videoIds);
