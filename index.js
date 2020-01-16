@@ -1,15 +1,5 @@
 'use strict';
 
-// Twitter info
-// const authUrl = 'https://api.twitter.com/oauth2/token';
-// const apiUrl = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
-// const apiKey = 'eLctPKB8DKN4KbNHhB2Q94xhp';
-// const apiSecretKey = 'IKh7hm1KUALKZs3tRCRr5P9m0ORdQiUIWA3i0Odgfp5BOXeTMO';
-
-// const apiKey = 'xvz1evFS4wEEPTGEFPHBog';
-// const apiSecretKey = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
-
-// Blogger
 const apiUrl = {
     blogger: {
         blogSearchUrl: 'https://www.googleapis.com/blogger/v3/blogs/byurl',
@@ -27,6 +17,8 @@ const apiKey = {
     wordpress: '',
     youtube: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
 };
+
+let continueSearch = true;
 
 // Generate query string that concatenates all parameters in proper format
 function formatQueryParameters(queryParameters) {
@@ -49,21 +41,27 @@ async function getPosts(searchName) {
     // Hide results list
     $('#js-search-results').addClass('hidden');
 
-    // Create parameters for API query
-    const queryParameters = {};
-    if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {
-        // queryParameters.url = searchName;
-        // queryParameters.key = apiKeyBlogger;
-        // apiUrl = apiUrlBlogger.url + apiUrlBlogger.blogSearch;
-        posts = await getBloggerPosts(searchName);
-    }
-    else if (searchName.search('wordpress.com') > -1) {
+    try {
+        // Create parameters for API query
+        const queryParameters = {};
+        if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {
+            // queryParameters.url = searchName;
+            // queryParameters.key = apiKeyBlogger;
+            // apiUrl = apiUrlBlogger.url + apiUrlBlogger.blogSearch;
+            posts = await getBloggerPosts(searchName);
+        }
+        else if (searchName.search('wordpress.com') > -1) {
         
+        }
+        return posts;
     }
-    return posts;
+    catch (error) {
+        throw error;
+    }
 }
 
 // Get posts from Blogger blog
+// CURRENTLY STOPS AFTER 100 POSTS FOUND
 async function getBloggerPosts(searchName) {
     console.log('`getBloggerPosts` ran');
 
@@ -82,8 +80,9 @@ async function getBloggerPosts(searchName) {
         url: searchName,
         key: apiKey.blogger,
     };
-    let queryParametersPosts = {
+    const queryParametersPosts = {
         key: apiKey.blogger,
+        fields: 'nextPageToken,items(published,content)',
     };
     
     let apiUrlBlogger = apiUrl.blogger.blogSearchUrl;
@@ -92,46 +91,58 @@ async function getBloggerPosts(searchName) {
     // Create API call URL
     let url = apiUrlBlogger + '?' + parameterString;
 
-    let response = await fetch(url);
-    // let response = await getApiData({ url: searchName, key: apiKey.blogger }, apiUrl.blogger.blogSearchUrl);
-    const blogInfo = await response.json();
-    const blogId = await blogInfo.id;
+    try {
+        let response = await fetch(url);
+        // let response = await getApiData({ url: searchName, key: apiKey.blogger }, apiUrl.blogger.blogSearchUrl);
+        const blogInfo = await response.json();
+        const blogId = await blogInfo.id;
 
-    // With blog ID, the first page of posts can now be retrieved
-    apiUrlBlogger = apiUrl.blogger.postSearch.replace('BLOGID', blogId);
+        // With blog ID, the first page of posts can now be retrieved
+        apiUrlBlogger = apiUrl.blogger.postSearch.replace('BLOGID', blogId);
 
-    // Retrieve each set (page) of posts until there isn't another set
-    while ("nextPageToken" in postsInfo || pageCount === 0) {
-        // Only add nextPageToken if first page has been retrieved
-        if (pageCount > 0) {
-            queryParametersPosts.pageToken = postsInfo.nextPageToken;
-            // console.log(postsInfo.nextPageToken);
+        // Retrieve each set (page) of posts until there isn't another set
+        while (("nextPageToken" in postsInfo || pageCount === 0) && continueSearch === true) {
+            // Only add nextPageToken if first page has been retrieved
+            if (pageCount > 0) {
+                queryParametersPosts.pageToken = postsInfo.nextPageToken;
+                // console.log(postsInfo.nextPageToken);
+            }
+            parameterString = formatQueryParameters(queryParametersPosts);
+            url = apiUrlBlogger + '?' + parameterString;
+            // console.log(url);
+            response = await fetch(url);
+            postsInfo = await response.json();
+            for (let i = 0; i < postsInfo.items.length; i++) {
+                posts.push(postsInfo.items[i].content);
+                $('#js-post-count').text(`Found ${posts.length} Posts`);
+            }
+            pageCount++;
+            if (pageCount > 100) {
+                break;
+            }
         }
-        parameterString = formatQueryParameters(queryParametersPosts);
-        url = apiUrlBlogger + '?' + parameterString;
-        // console.log(url);
-        response = await fetch(url);
-        postsInfo = await response.json();
-        for (let i = 0; i < postsInfo.items.length; i++) {
-            posts.push(postsInfo.items[i].content);
-        }
-        pageCount++;
-        if (pageCount > 100) {
-            break;
-        }
+
+        // Enable future searches in case stop button was clicked
+        continueSearch = true;
+
+        // Clear videos found
+        $('#js-post-count').empty();
+
+        // Return oldest posts by default        
+        return posts.reverse();
     }
-    return posts;
-
-    
+    catch(error) {
+        throw error;
+    }    
 }
 
-async function getApiData(queryParameters, siteUrl) {
-    let parameterString = formatQueryParameters(queryParameters);
-    // Create API call URL
-    let url = siteUrl + '?' + parameterString;
+// async function getApiData(queryParameters, siteUrl) {
+//     let parameterString = formatQueryParameters(queryParameters);
+//     // Create API call URL
+//     let url = siteUrl + '?' + parameterString;
 
-    return response = await fetch(url);
-}
+//     return response = await fetch(url);
+// }
 
 // Get posts from Wordpress blog
 async function getWordpressPosts(searchName) {
@@ -145,7 +156,8 @@ function parseYoutubeLinks(posts) {
     // There are different forms that this could take:
     // 1. http://www.youtube.com/v/5KOs70Su_8s&amp;hl=en&amp;fs=1
     // 2. https://www.youtube.com/watch?v=pMmn3vrCOx4
-    // 3. Shortened youtube URL's > use curl?
+    // 3. https://www.youtube.com/embed/fGgfl71kfpE
+    // 4. Shortened youtube URL's > use curl?
 
     // NEED TO REMOVE DUPLICATE VIDEOS
     // NEED TO HANDLE POSTS WITH MULTIPLE VIDEOS (try .indexOf())
@@ -162,16 +174,21 @@ function parseYoutubeLinks(posts) {
             // http://www.youtube.com/v/5KOs70Su_8s
             if (link[0] === 'v') {
                 link = link.slice(2, 13); // Chop off 'v/', end after video ID
-                console.log(link);
-                videoIds.push(link);
             }
             // If not above format, then assume following format:
             // https://www.youtube.com/watch?v=pMmn3vrCOx4
-            else {
+            else if (link[0] === 'w') {
                 link = link.slice(8, 19); // Chop off 'watch?v=', end after video ID
-                console.log(link);
+            }
+            // If not above formats, then assume following format:
+            // https://www.youtube.com/embed/fGgfl71kfpE
+            else if (link[0] === 'e') {
+                link = link.slice(6, 17); // Chop off 'embed/', end after video ID
+            }
+
+            // Only add ID to list if it's not already in the list
+            if (!videoIds.find(item => item === link)) {
                 videoIds.push(link);
-                //return posts[i].slice(linkStart + 31, linkStart + 42);
             }
             
         }
@@ -216,7 +233,7 @@ async function getVideoInfo(videoId) {
 }
 
 // Display results in DOM
-async function displayResults(videoIds) {
+async function displayResults(videoIds, maxResults) {
     console.log('`displayResults` ran');
 
     // Grab the list container
@@ -227,39 +244,59 @@ async function displayResults(videoIds) {
 
     // Only add videos if youtube links were found
     if (videoIds.length > 0) {
-        $('#js-item-count').text(`${videoIds.length} Videos Found`);
+        // Stop going through ID's once max results listed
+        let stopCount = (videoIds.length > maxResults) ? maxResults : videoIds.length;
+        let videoCount = 0;
+        //console.log('stopCount = ' + stopCount);
+        
         // For each ID in videoIds, get info about video, add to list item;
-        for (let i = 0; i < videoIds.length; i++) {
-            // Find address index for physical address if address exists
+        for (let i = 0; i < stopCount; i++) {
+            // Get video info for each ID
             const videoInfo = await getVideoInfo(videoIds[i]);
+            console.log('Title is ' + videoInfo.title);
+            // Only display if video info is available
             if (videoInfo.title !== 'Video Unavailable') {
                 console.log(videoInfo);
             
-                // Add park info as list item
+                // Add video info as list item
                 list.append(`
                 <li>
                     ${generateYoutubeEmbed(videoIds[i])}
                     <br>
                     ${videoInfo.title}
                     <br>
-                    <br>
-                    ${videoInfo.desc}
-                    <br>
-                    <br>
+                    <br>                    
                     <a href="https://www.youtube.com/watch?v=${videoIds[i]}">https://www.youtube.com/watch?v=${videoIds[i]}</a>
                     <br>
                     <br>
                 </li>`
                 );
+                videoCount++;
+            }
+            // If video is unavailable, remove ID from list, adjust counter variables accordingly
+            else {
+                videoIds.splice(i, 1);
+                // Decrement stopCount so loop doesn't go on forever
+                stopCount--;
+                // Decrement i so ID's don't get skipped
+                i--;
             }
         }
+        $('#js-item-count').text(`${videoCount} Videos Found`);
+
+        // Create playlist link
+        $('#js-playlist-link').attr('href', generateYoutubePlaylist(videoIds));
     }
     // Otherwise state that no videos were found
     else {
         list.append('<li>No videos could be found at the blog you entered.</li>');
     }
-    // Change classes to display results list
-    $('#js-search-results').removeClass('hidden'); 
+
+    // Hide loading container, unhide results list, footer
+    $('#js-loading-container').addClass('hidden');
+    $('#js-footer').removeClass('hidden');
+    $('#js-search-results').removeClass('hidden');
+    
 
 }
 
@@ -270,23 +307,87 @@ function generateYoutubeEmbed(videoId) {
     return `<iframe class="yt-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
 
-// Watch for form submittals
-function watchForm() {
-    console.log('`watchForm` ran');
+function generateYoutubePlaylist(videoIds){
+    const ytUrl = 'https://www.youtube.com/watch_videos';
+    const options = {
+        redirect: 'manual',
+    }
+    const queryParameters = {
+        video_ids: videoIds.join(','),
+    }
+    const parameterString = formatQueryParameters(queryParameters);
+    const url = ytUrl + '?' + parameterString;
+    // const response = await fetch(url, options);
+    // console.log(response);
+    // const playlistUrl = await response.json();
+    return url;
+}
+
+// Reset the page to show the initial view
+function resetView() {
+    console.log('`resetView` ran');
+
+    $('#js-search-name').val('');
+    $('#js-max-results').val('10');
+    $('#js-search-container').removeClass('hidden');
+    $('#js-footer').addClass('hidden');
+    $('#js-search-results').addClass('hidden');
+    $('#js-error-container').addClass('hidden');
+    $('#js-loading-container').addClass('hidden');
+
+}
+
+// Watch for events in DOM
+function main() {
+    console.log('`main` ran');
+
+    // Watch for form submittals
     $('#js-search-form').submit(async function () {
         event.preventDefault();
 
         const searchName = $('#js-search-name').val();
+        const maxResults = $('#js-max-results').val();
         // const platform = $('#js-platform').val();
-        //console.log(platform, platform === 'Blogger');
         
-        const posts = await getPosts(searchName);
-        // console.log(posts);
-        const videoIds = parseYoutubeLinks(posts);
-        // console.log(videoIds);
-        displayResults(videoIds);
+        try {
+            // Hide search form, unhide loading container
+            $('#js-search-container').addClass('hidden');
+            $('#js-loading-container').removeClass('hidden');
+
+            const posts = await getPosts(searchName);
+            let videoIds = parseYoutubeLinks(posts);
         
+            // Reduce to list to maxResults length if necessary
+            // if (videoIds.length > maxResults) {
+            //     videoIds = videoIds.slice(0, maxResults);
+            //     console.log(videoIds);
+            // }
+
+            // Show videos found
+            displayResults(videoIds, maxResults);
+        }
+        catch (error) {            
+            $('#js-error-message').text(`There was an error: ${error.message}`);
+            $('#js-error-container').removeClass('hidden');
+            console.log(error);
+        }
+    });
+
+    // Watch for stop search button click
+    $('#js-stop-button').click(function () {
+        continueSearch = false;
+    })
+
+    // Watch for link clicks
+    $('#js-new-link').click(function () {
+        event.preventDefault();
+        resetView();
+    });
+
+    $('#js-error-reset-link').click(function () {
+        event.preventDefault();
+        resetView();
     })
 }
 
-$(watchForm());
+$(main());

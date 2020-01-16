@@ -13,48 +13,56 @@
         <img class="logo" src="images/escalator-into-tube.png" alt="person taking escalator into vertical tube">
     </header>
     <main>
-        
-        <p>As the "great" US Senator Ted Stevens once said about the internet, "It's a series of tubes." Indeed. Sometimes we post YouTube videos online and forget about them. This site aims to help you remember them. So, enjoy a walk, <i>Down The Tubes</i>.</p>
-        <form id="js-search-form">
-            <label for="js-search-name">Enter a blog URL:</label>
-            <br>
-            <input id="js-search-name" class="search-name" type="text" value="https://camsbrain.blogspot.com/" required />
-            <br>
-            <br>
-            <!-- <label for="js-platform">Select Blog Host:</label>
-            <br>
-            <select id="js-platform">
-                <option value="blogger">Blogger</option>
-                <option value="wordpress">Wordpress</option>
-            </select>
-            <br> -->
-            <label for="js-max-results">Max Results</label>
-            <br>
-            <input id="js-max-results" type="number" value="10" required />
-            <br>
-            <br>
-            <input id="js-search" type="submit" value="Find Videos">
-        </form>
-        <section id="js-error-container">
+        <section id="js-search-container" class="search-container">
+            <p>As the "great" US Senator Ted Stevens once said about the internet, "It's a series of tubes." Indeed. Sometimes we post YouTube videos online and forget about them. This site aims to help you remember them. So, enjoy a walk, <i>Down The Tubes</i>.</p>
+            <form id="js-search-form">
+                <label for="js-search-name">Enter a blog URL:</label>
+                <br>
+                <input id="js-search-name" class="search-name" type="text" value="https://camsbrain.blogspot.com/" required />
+                <br>
+                <br>
+                <!-- <label for="js-platform">Select Blog Host:</label>
+                <br>
+                <select id="js-platform">
+                    <option value="blogger">Blogger</option>
+                    <option value="wordpress">Wordpress</option>
+                </select>
+                <br> -->
+                <label for="js-max-results">Max Results</label>
+                <br>
+                <input id="js-max-results" type="number" value="10" required />
+                <br>
+                <br>
+                <input id="js-search" type="submit" value="Find Videos">
+            </form>
+        </section>
+        <section id="js-loading-container" class="loading-container hidden">
+            <h2>Finding Blog Posts</h2>
+            <!-- <div class="loader"></div> -->
+            <p id="js-post-count"></p>
+            <button id="js-stop-button">Stop Search</button>
+        </section>
+        <section id="js-error-container" class="error-container hidden">
             <p id="js-error-message" class="error-message"></p>
+            <p><button id="js-error-reset-link">Try Again</button></p>
         </section>
         <section id="js-search-results" class="search-results hidden">
             <h2>Search Results</h2>
             <p id="js-item-count" class="item-count"></p>
-            <p>PLAYLIST HERE</p>
+            <p><a id="js-playlist-link">LAUNCH PLAYLIST</a></p>
             <ol id="js-search-results-list" class="search-results-list">
             </ol>
-
-        </section>
-        <footer>
-            <div class="footer-container">
-                <a href="">NEW</a>
-                <a href="">SORT</a>
-                <a href="">SHARE</a>
-            </div>
-        </footer>
+        </section>        
     </main>
+    <footer id="js-footer" class="hidden">
+        <div class="footer-container">
+            <a id="js-new-link">NEW</a>
+            <a id="js-sort-link">SORT</a>
+            <a id="js-share-link">SHARE</a>
+        </div>
+    </footer>
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <!-- <script src="jquery-3.3.1.js"></script> -->
     <script src="index.js"></script>
 </body>
 </html>
