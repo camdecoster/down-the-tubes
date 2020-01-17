@@ -24,6 +24,7 @@ header {
 }
 
 footer {
+  font-family: var(--font-2);
   height: 40px;
   position: fixed;
   bottom: 0;
@@ -61,7 +62,7 @@ main {
   max-width: 500px;
 }
 
-.error-message {
+.error-container {
   color: red;
   font-weight: bold;
 }
@@ -98,8 +99,16 @@ main {
   }
 }
 
-.footer-container:nth-child(2n) {
+/* .footer-container:nth-child(2n) {
   margin-right: 200px;
+} */
+
+.footer-container a {
+  font-weight: bold;
+}
+
+.footer-container a:hover {
+  color: blue;
 }
 
 @media screen and (min-width: 500px) {

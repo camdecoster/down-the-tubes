@@ -1,22 +1,38 @@
 'use strict';
 
-const apiUrl = {
-    blogger: {
-        blogSearchUrl: 'https://www.googleapis.com/blogger/v3/blogs/byurl',
-        postSearch: 'https://www.googleapis.com/blogger/v3/blogs/BLOGID/posts',
-    },
-    wordpress: {
+// const apiUrl = {
+//     blogger: {
+//         blogSearchUrl: 'https://www.googleapis.com/blogger/v3/blogs/byurl',
+//         postSearch: 'https://www.googleapis.com/blogger/v3/blogs/BLOGID/posts',
+//     },
+//     wordpress: {
 
+//     },
+//     youtube: {
+//         videoInfo: 'https://www.googleapis.com/youtube/v3/videos',
+//     }
+// };
+// const apiKey = {
+//     blogger: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
+//     wordpress: '',
+//     youtube: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
+// };
+
+const apiInfo = {
+    blogger: {
+        key: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
+        url: {
+            blogSearch: 'https://www.googleapis.com/blogger/v3/blogs/byurl',
+            postSearch: 'https://www.googleapis.com/blogger/v3/blogs/BLOGID/posts',
+        }
     },
     youtube: {
-        videoInfo: 'https://www.googleapis.com/youtube/v3/videos',
+        key: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
+        url: {
+            videoInfo: 'https://www.googleapis.com/youtube/v3/videos',
+        }
     }
-};
-const apiKey = {
-    blogger: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
-    wordpress: '',
-    youtube: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
-};
+}
 
 let continueSearch = true;
 
@@ -36,24 +52,25 @@ async function getPosts(searchName) {
     let posts;
 
     // Clear out previous error message
-    $('#js-error-message').empty();
+    //$('#js-error-message').empty();
 
     // Hide results list
-    $('#js-search-results').addClass('hidden');
+    //$('#js-search-results').addClass('hidden');
 
     try {
-        // Create parameters for API query
-        const queryParameters = {};
-        if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {
-            // queryParameters.url = searchName;
-            // queryParameters.key = apiKeyBlogger;
-            // apiUrl = apiUrlBlogger.url + apiUrlBlogger.blogSearch;
+        if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {            
             posts = await getBloggerPosts(searchName);
+            return posts;
         }
-        else if (searchName.search('wordpress.com') > -1) {
-        
+        // else if (searchName.search('tumblr') > -1) {
+        //     // Add logic for tumblr blogs
+        // }
+        // else if (searchName.search('wordpress.com') > -1) {
+        //     // Add logic for Wordpress blogs
+        // }
+        else {
+            throw new Error('Not a Blogger URL');
         }
-        return posts;
     }
     catch (error) {
         throw error;
@@ -78,27 +95,30 @@ async function getBloggerPosts(searchName) {
     
     const queryParametersBlogId = {
         url: searchName,
-        key: apiKey.blogger,
+        key: apiInfo.blogger.key,
     };
     const queryParametersPosts = {
-        key: apiKey.blogger,
+        key: apiInfo.blogger.key,
         fields: 'nextPageToken,items(published,content)',
     };
     
-    let apiUrlBlogger = apiUrl.blogger.blogSearchUrl;
+    let apiUrl = apiInfo.blogger.url.blogSearch;
     let parameterString = formatQueryParameters(queryParametersBlogId);
 
     // Create API call URL
-    let url = apiUrlBlogger + '?' + parameterString;
+    let url = apiUrl + '?' + parameterString;
 
     try {
         let response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(response.status);
+        }
         // let response = await getApiData({ url: searchName, key: apiKey.blogger }, apiUrl.blogger.blogSearchUrl);
         const blogInfo = await response.json();
-        const blogId = await blogInfo.id;
+        const blogId = blogInfo.id;
 
         // With blog ID, the first page of posts can now be retrieved
-        apiUrlBlogger = apiUrl.blogger.postSearch.replace('BLOGID', blogId);
+        apiUrl = apiInfo.blogger.url.postSearch.replace('BLOGID', blogId);
 
         // Retrieve each set (page) of posts until there isn't another set
         while (("nextPageToken" in postsInfo || pageCount === 0) && continueSearch === true) {
@@ -108,7 +128,7 @@ async function getBloggerPosts(searchName) {
                 // console.log(postsInfo.nextPageToken);
             }
             parameterString = formatQueryParameters(queryParametersPosts);
-            url = apiUrlBlogger + '?' + parameterString;
+            url = apiUrl + '?' + parameterString;
             // console.log(url);
             response = await fetch(url);
             postsInfo = await response.json();
@@ -204,13 +224,13 @@ async function getVideoInfo(videoId) {
     const queryParameters = {
         part: 'snippet',
         id: videoId,
-        key: apiKey.youtube,
+        key: apiInfo.youtube.key,
     };
 
     const parameterString = formatQueryParameters(queryParameters);
 
     // Create API call URL
-    const url = apiUrl.youtube.videoInfo + '?' + parameterString;
+    const url = apiInfo.youtube.url.videoInfo + '?' + parameterString;
     
     try {
         const response = await fetch(url);
@@ -307,7 +327,9 @@ function generateYoutubeEmbed(videoId) {
     return `<iframe class="yt-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
 
-function generateYoutubePlaylist(videoIds){
+// Create link to youtube playlist of videos found
+function generateYoutubePlaylist(videoIds) {
+    console.log('`generateYoutubePlaylist` ran');
     const ytUrl = 'https://www.youtube.com/watch_videos';
     const options = {
         redirect: 'manual',
@@ -317,13 +339,15 @@ function generateYoutubePlaylist(videoIds){
     }
     const parameterString = formatQueryParameters(queryParameters);
     const url = ytUrl + '?' + parameterString;
+    // Is there a way to get the redirect URL from fetch() without following?
+
     // const response = await fetch(url, options);
     // console.log(response);
     // const playlistUrl = await response.json();
     return url;
 }
 
-// Reset the page to show the initial view
+// Reset the page to show the initial view, empty previous results
 function resetView() {
     console.log('`resetView` ran');
 
@@ -332,9 +356,23 @@ function resetView() {
     $('#js-search-container').removeClass('hidden');
     $('#js-footer').addClass('hidden');
     $('#js-search-results').addClass('hidden');
+    $('#js-search-results-list').empty();
     $('#js-error-container').addClass('hidden');
+    $('#js-error-message').empty();
     $('#js-loading-container').addClass('hidden');
+    $('#js-post-count').empty();
+}
 
+// Check errors and return the appropriate info
+function errorCheck(error) {
+    console.log('`errorCheck` ran');
+    
+    if (error.message === "404" || error.message === "400") {
+        return "Blog could not be found.";
+    }
+    else {
+        return error.message;
+    }
 }
 
 // Watch for events in DOM
@@ -366,10 +404,11 @@ function main() {
             // Show videos found
             displayResults(videoIds, maxResults);
         }
-        catch (error) {            
-            $('#js-error-message').text(`There was an error: ${error.message}`);
+        catch (error) { 
+            const errorInfo = errorCheck(error);
+            $('#js-loading-container').addClass('hidden');
+            $('#js-error-message').text(`${errorInfo}`);
             $('#js-error-container').removeClass('hidden');
-            console.log(error);
         }
     });
 
