@@ -1,23 +1,6 @@
 'use strict';
 
-// const apiUrl = {
-//     blogger: {
-//         blogSearchUrl: 'https://www.googleapis.com/blogger/v3/blogs/byurl',
-//         postSearch: 'https://www.googleapis.com/blogger/v3/blogs/BLOGID/posts',
-//     },
-//     wordpress: {
-
-//     },
-//     youtube: {
-//         videoInfo: 'https://www.googleapis.com/youtube/v3/videos',
-//     }
-// };
-// const apiKey = {
-//     blogger: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
-//     wordpress: '',
-//     youtube: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
-// };
-
+// Declare information to access relevant API's
 const apiInfo = {
     blogger: {
         key: 'AIzaSyClUZftyAzopCHgsID010RIfK2d_9ntf9E',
@@ -34,9 +17,11 @@ const apiInfo = {
     }
 }
 
+// Only search for posts if this is true. User can stop search if they click
+// the stop search button.
 let continueSearch = true;
 
-// Generate query string that concatenates all parameters in proper format
+// Generate query string that concatenates all API parameters in proper format
 function formatQueryParameters(queryParameters) {
     console.log('`formatQueryParameters` ran');
 
@@ -46,20 +31,16 @@ function formatQueryParameters(queryParameters) {
     return parameterString.join('&');
 }
 
-// Call selected site API to get post history for searchName
+// Call selected site API to get post history for searchName. Calls platform
+// specific function after determining which platform is used.
 async function getPosts(searchName) {
     console.log('`getPosts` ran')
-    let posts;
 
-    // Clear out previous error message
-    //$('#js-error-message').empty();
-
-    // Hide results list
-    //$('#js-search-results').addClass('hidden');
-
+    
     try {
+        // CONSIDER ADDING HTTPS IF USER FORGETS
         if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {            
-            posts = await getBloggerPosts(searchName);
+            const posts = await getBloggerPosts(searchName);
             return posts;
         }
         // else if (searchName.search('tumblr') > -1) {
@@ -86,57 +67,55 @@ async function getBloggerPosts(searchName) {
     // 1. Get blog ID from URL
     // 2. Get initial posts and nextPageToken
     // 3. Get next page until there is no more nextPageToken
-
-    // NEED TO HANDLE NO POSTS FOUND
     
+    // Track how many pages followed on blog to add pageToken at correct time,
+    // end search after meeting threshold
     let pageCount = 0;
+
+    // Create container for API response with info for up to 10 posts
     let postsInfo = {};
+
+    // Create container for content taken from each post
     const posts = [];
     
-    const queryParametersBlogId = {
-        url: searchName,
-        key: apiInfo.blogger.key,
+    // Define API query parameters for getting blog ID, posts
+    const queryParameters = {
+        blogId: {
+            key: apiInfo.blogger.key,
+            url: searchName,            
+        },
+        posts: {
+            key: apiInfo.blogger.key,
+            fields: 'nextPageToken,items(published,content)',
+        },
     };
-    const queryParametersPosts = {
-        key: apiInfo.blogger.key,
-        fields: 'nextPageToken,items(published,content)',
-    };
-    
-    let apiUrl = apiInfo.blogger.url.blogSearch;
-    let parameterString = formatQueryParameters(queryParametersBlogId);
-
-    // Create API call URL
-    let url = apiUrl + '?' + parameterString;
 
     try {
-        let response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(response.status);
-        }
-        // let response = await getApiData({ url: searchName, key: apiKey.blogger }, apiUrl.blogger.blogSearchUrl);
+        // Get blog ID from API
+        let response = await getApiData(queryParameters.blogId, apiInfo.blogger.url.blogSearch);
         const blogInfo = await response.json();
         const blogId = blogInfo.id;
 
-        // With blog ID, the first page of posts can now be retrieved
-        apiUrl = apiInfo.blogger.url.postSearch.replace('BLOGID', blogId);
-
         // Retrieve each set (page) of posts until there isn't another set
+        // or until user clicks the stop search button
         while (("nextPageToken" in postsInfo || pageCount === 0) && continueSearch === true) {
-            // Only add nextPageToken if first page has been retrieved
+            // Only add nextPageToken to query parameters if first page has been retrieved
             if (pageCount > 0) {
-                queryParametersPosts.pageToken = postsInfo.nextPageToken;
-                // console.log(postsInfo.nextPageToken);
+                queryParameters.posts.pageToken = postsInfo.nextPageToken;
             }
-            parameterString = formatQueryParameters(queryParametersPosts);
-            url = apiUrl + '?' + parameterString;
-            // console.log(url);
-            response = await fetch(url);
+            
+            // Get posts from blog (using blog ID as part of query URL)
+            response = await getApiData(queryParameters.posts, apiInfo.blogger.url.postSearch.replace('BLOGID', blogId));
             postsInfo = await response.json();
+
+            // Go through each post returned in postsInfo, get content and save it
             for (let i = 0; i < postsInfo.items.length; i++) {
                 posts.push(postsInfo.items[i].content);
                 $('#js-post-count').text(`Found ${posts.length} Posts`);
             }
             pageCount++;
+
+            // If pageCount grows too high (from a blog with lots of posts), break loop
             if (pageCount > 100) {
                 break;
             }
@@ -144,9 +123,6 @@ async function getBloggerPosts(searchName) {
 
         // Enable future searches in case stop button was clicked
         continueSearch = true;
-
-        // Clear videos found
-        $('#js-post-count').empty();
 
         // Return oldest posts by default        
         return posts.reverse();
@@ -156,20 +132,33 @@ async function getBloggerPosts(searchName) {
     }    
 }
 
-// async function getApiData(queryParameters, siteUrl) {
-//     let parameterString = formatQueryParameters(queryParameters);
-//     // Create API call URL
-//     let url = siteUrl + '?' + parameterString;
+// Create API query URL, then fetch data from API
+async function getApiData(queryParameters, siteUrl) {
+    console.log('`getApiData` ran');
 
-//     return response = await fetch(url);
-// }
+    // Create API query URL for getting blog ID
+    let parameterString = formatQueryParameters(queryParameters);
+    let url = siteUrl + '?' + parameterString;
+    try {
+        // Get info from API
+        const response = await fetch(url);
+        // Make sure response is OK before proceeding
+        if (!response.ok) {
+            throw new Error(response.status);
+        }
+        return response;
+    }
+    catch(error) {
+        throw (error);
+    }
+}
 
-// Get posts from Wordpress blog
+// Get posts from Wordpress blog (FUTURE)
 async function getWordpressPosts(searchName) {
     console.log('`getWordpressPosts` ran');
 }
 
-// Find all youtube links in a post, return video ID's
+// Find all YouTube links in a post, return video ID's
 function parseYoutubeLinks(posts) {
     console.log('`parseYoutubeLinks` ran');
 
@@ -179,40 +168,56 @@ function parseYoutubeLinks(posts) {
     // 3. https://www.youtube.com/embed/fGgfl71kfpE
     // 4. Shortened youtube URL's > use curl?
 
-    // NEED TO REMOVE DUPLICATE VIDEOS
-    // NEED TO HANDLE POSTS WITH MULTIPLE VIDEOS (try .indexOf())
-
     const videoIds = [];
+    //const search = true;
+    
 
-    for (let i = 0; i < posts.length; i++){
-        // NEED TO ADD URI DECODING
-        let linkStart = posts[i].search('youtube.com/');
-        
-        if (linkStart > -1) {
-            let link = posts[i].slice(linkStart + 12); // Chop off youtube.com/
-            // Check for youtube links of the format:
-            // http://www.youtube.com/v/5KOs70Su_8s
-            if (link[0] === 'v') {
-                link = link.slice(2, 13); // Chop off 'v/', end after video ID
-            }
-            // If not above format, then assume following format:
-            // https://www.youtube.com/watch?v=pMmn3vrCOx4
-            else if (link[0] === 'w') {
-                link = link.slice(8, 19); // Chop off 'watch?v=', end after video ID
-            }
-            // If not above formats, then assume following format:
-            // https://www.youtube.com/embed/fGgfl71kfpE
-            else if (link[0] === 'e') {
-                link = link.slice(6, 17); // Chop off 'embed/', end after video ID
+    for (let i = 0; i < posts.length; i++) {
+        // ADD URI DECODING?
+        let linkStart = 0;
+        let searchPosition = 0;
+        while (linkStart > -1) {
+            // Search for YouTube URL in post
+            linkStart = posts[i].indexOf('youtube.com/', searchPosition);
+
+            // Save first occurrence of YouTube URL to continue search after that point.
+            // Some posts might have more than one URL.
+            searchPosition = linkStart + 1;
+
+            // Make sure post is long enough to hold shortest YouTube URL. If not, break loop.
+            if (posts[i].length < linkStart + 25) {
+                break;
             }
 
-            // Only add ID to list if it's not already in the list
-            if (!videoIds.find(item => item === link)) {
-                videoIds.push(link);
-            }
+            // If URL found, get video ID
+            if (linkStart > -1) {
+                let link = posts[i].slice(linkStart + 12); // Chop off youtube.com/
+                // Check for youtube links of the format:
+                // http://www.youtube.com/v/5KOs70Su_8s
+                if (link[0] === 'v') {
+                    link = link.slice(2, 13); // Chop off 'v/', end after video ID
+                    console.log(link);
+                }
+                // If not above format, then assume following format:
+                // https://www.youtube.com/watch?v=pMmn3vrCOx4
+                else if (link[0] === 'w') {
+                    link = link.slice(8, 19); // Chop off 'watch?v=', end after video ID
+                }
+                // If not above formats, then assume following format:
+                // https://www.youtube.com/embed/fGgfl71kfpE
+                else if (link[0] === 'e') {
+                    link = link.slice(6, 17); // Chop off 'embed/', end after video ID
+                }
+
+                // Only add ID to list if it's not already in the list (no duplicates)
+                if (!videoIds.find(item => item === link)) {
+                    videoIds.push(link);
+                }
             
+            }
         }
     }
+
     console.log('videoIds = ' + videoIds);
     return videoIds;
 }
@@ -221,20 +226,19 @@ function parseYoutubeLinks(posts) {
 async function getVideoInfo(videoId) {
     console.log('`getVideoInfo` ran');
 
+    // Create parameters for API query
     const queryParameters = {
+        key: apiInfo.youtube.key,
         part: 'snippet',
         id: videoId,
-        key: apiInfo.youtube.key,
     };
-
-    const parameterString = formatQueryParameters(queryParameters);
-
-    // Create API call URL
-    const url = apiInfo.youtube.url.videoInfo + '?' + parameterString;
     
     try {
-        const response = await fetch(url);
+        // Get video info from YouTube API
+        const response = await getApiData(queryParameters, apiInfo.youtube.url.videoInfo);
         const videoInfo = await response.json();
+
+        // Get relevant info about video
         const videoTitle = videoInfo.items[0].snippet.title;
         const videoDesc = videoInfo.items[0].snippet.description;
         const videoThumbUrl = videoInfo.items[0].snippet.thumbnails.high.url;
@@ -320,16 +324,10 @@ async function displayResults(videoIds, maxResults) {
 
 }
 
-// Create youtube embed code, to be used for showing videos in the DOM
-function generateYoutubeEmbed(videoId) {
-    console.log('`generateYoutubeEmbed` ran');
-
-    return `<iframe class="yt-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-}
-
 // Create link to youtube playlist of videos found
 function generateYoutubePlaylist(videoIds) {
     console.log('`generateYoutubePlaylist` ran');
+
     const ytUrl = 'https://www.youtube.com/watch_videos';
     const options = {
         redirect: 'manual',
@@ -345,6 +343,13 @@ function generateYoutubePlaylist(videoIds) {
     // console.log(response);
     // const playlistUrl = await response.json();
     return url;
+}
+
+// Create youtube embed code, to be used for showing videos in the DOM
+function generateYoutubeEmbed(videoId) {
+    console.log('`generateYoutubeEmbed` ran');
+
+    return `<iframe class="yt-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
 
 // Reset the page to show the initial view, empty previous results
@@ -383,27 +388,27 @@ function main() {
     $('#js-search-form').submit(async function () {
         event.preventDefault();
 
+        // Get the blog name and desired max results that user entered
         const searchName = $('#js-search-name').val();
         const maxResults = $('#js-max-results').val();
         // const platform = $('#js-platform').val();
         
+        // Try to get post info to create results page
         try {
             // Hide search form, unhide loading container
             $('#js-search-container').addClass('hidden');
             $('#js-loading-container').removeClass('hidden');
 
+            // Get post content
             const posts = await getPosts(searchName);
+
+            // Get video ID's from posts
             let videoIds = parseYoutubeLinks(posts);
-        
-            // Reduce to list to maxResults length if necessary
-            // if (videoIds.length > maxResults) {
-            //     videoIds = videoIds.slice(0, maxResults);
-            //     console.log(videoIds);
-            // }
 
             // Show videos found
             displayResults(videoIds, maxResults);
         }
+        // If API call failed, show error to user
         catch (error) { 
             const errorInfo = errorCheck(error);
             $('#js-loading-container').addClass('hidden');
