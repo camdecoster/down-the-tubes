@@ -21,14 +21,59 @@ const apiInfo = {
 // the stop search button.
 let continueSearch = true;
 
-// Generate query string that concatenates all API parameters in proper format
-function formatQueryParameters(queryParameters) {
-    console.log('`formatQueryParameters` ran');
+// Watch for events in DOM
+function main() {
+    console.log('`main` ran');
 
-    const parameterString = Object.keys(queryParameters)
-        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryParameters[key])}`);
-    // console.log('parameterString = ' + parameterString);
-    return parameterString.join('&');
+    // Watch for form submittals
+    $('#js-search-form').submit(async function () {
+        event.preventDefault();
+
+        // Get the blog name and desired max results that user entered
+        const searchName = $('#js-search-name').val();
+        const maxResults = $('#js-max-results').val();
+        // const platform = $('#js-platform').val();
+        
+        // Try to get post info to create results page
+        try {
+            // Hide search form, unhide loading container
+            $('#js-search-container').addClass('hidden');
+            $('#js-loading-container').removeClass('hidden');
+
+            // Get post content
+            const posts = await getPosts(searchName);
+
+            // Get video ID's from posts
+            let videoIds = parseYoutubeLinks(posts);
+
+            // Show videos found
+            displayResults(videoIds, maxResults);
+        }
+        // If API call failed, show error to user
+        catch (error) { 
+            const errorInfo = errorCheck(error);
+            $('#js-loading-container').addClass('hidden');
+            $('#js-error-message').text(`${errorInfo}`);
+            $('#js-error-container').removeClass('hidden');
+        }
+    });
+
+    // Watch for stop search button click
+    $('#js-stop-button').click(function () {
+        continueSearch = false;
+    })
+
+    // Watch for new search link click
+    $('#js-new-link').click(function () {
+        event.preventDefault();
+        resetView();
+    });
+
+    // Watch for Try Again button click after error
+    $('#js-error-reset-link').click(function () {
+        event.preventDefault();
+        resetView();
+    })
 }
 
 // Call selected site API to get post history for searchName. Calls platform
@@ -153,9 +198,14 @@ async function getApiData(queryParameters, siteUrl) {
     }
 }
 
-// Get posts from Wordpress blog (FUTURE)
-async function getWordpressPosts(searchName) {
-    console.log('`getWordpressPosts` ran');
+// Generate query string that concatenates all API parameters in proper format
+function formatQueryParameters(queryParameters) {
+    console.log('`formatQueryParameters` ran');
+
+    const parameterString = Object.keys(queryParameters)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryParameters[key])}`);
+    // console.log('parameterString = ' + parameterString);
+    return parameterString.join('&');
 }
 
 // Find all YouTube links in a post, return video ID's
@@ -220,40 +270,6 @@ function parseYoutubeLinks(posts) {
 
     console.log('videoIds = ' + videoIds);
     return videoIds;
-}
-
-// Get details about video like title, upload date, etc.
-async function getVideoInfo(videoId) {
-    console.log('`getVideoInfo` ran');
-
-    // Create parameters for API query
-    const queryParameters = {
-        key: apiInfo.youtube.key,
-        part: 'snippet',
-        id: videoId,
-    };
-    
-    try {
-        // Get video info from YouTube API
-        const response = await getApiData(queryParameters, apiInfo.youtube.url.videoInfo);
-        const videoInfo = await response.json();
-
-        // Get relevant info about video
-        const videoTitle = videoInfo.items[0].snippet.title;
-        const videoDesc = videoInfo.items[0].snippet.description;
-        const videoThumbUrl = videoInfo.items[0].snippet.thumbnails.high.url;
-
-        return {
-            title: videoTitle,
-            desc: videoDesc,
-            thumbUrl: videoThumbUrl,
-        };
-    }
-    catch {
-        return {
-            title: 'Video Unavailable',
-        }
-    }
 }
 
 // Display results in DOM
@@ -324,8 +340,51 @@ async function displayResults(videoIds, maxResults) {
 
 }
 
+// Get details about video like title, upload date, etc.
+async function getVideoInfo(videoId) {
+    console.log('`getVideoInfo` ran');
+
+    // Create parameters for API query
+    const queryParameters = {
+        key: apiInfo.youtube.key,
+        part: 'snippet',
+        id: videoId,
+    };
+    
+    try {
+        // Get video info from YouTube API
+        const response = await getApiData(queryParameters, apiInfo.youtube.url.videoInfo);
+        const videoInfo = await response.json();
+
+        // Get relevant info about video
+        const videoTitle = videoInfo.items[0].snippet.title;
+        const videoDesc = videoInfo.items[0].snippet.description;
+        const videoThumbUrl = videoInfo.items[0].snippet.thumbnails.high.url;
+
+        return {
+            title: videoTitle,
+            desc: videoDesc,
+            thumbUrl: videoThumbUrl,
+        };
+    }
+    catch {
+        return {
+            title: 'Video Unavailable',
+        }
+    }
+}
+
+// Create youtube embed code, to be used for showing videos in the DOM
+function generateYoutubeEmbed(videoId) {
+    console.log('`generateYoutubeEmbed` ran');
+
+    return `<iframe class="yt-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+}
+
 // Create link to youtube playlist of videos found
 function generateYoutubePlaylist(videoIds) {
+    // This method of generating a playlist will max out at 50 videos.
+    // Consider creating multiple links?
     console.log('`generateYoutubePlaylist` ran');
 
     const ytUrl = 'https://www.youtube.com/watch_videos';
@@ -345,11 +404,16 @@ function generateYoutubePlaylist(videoIds) {
     return url;
 }
 
-// Create youtube embed code, to be used for showing videos in the DOM
-function generateYoutubeEmbed(videoId) {
-    console.log('`generateYoutubeEmbed` ran');
-
-    return `<iframe class="yt-video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+// Check errors and return the appropriate info
+function errorCheck(error) {
+    console.log('`errorCheck` ran');
+    
+    if (error.message === "404" || error.message === "400") {
+        return "Blog could not be found.";
+    }
+    else {
+        return error.message;
+    }
 }
 
 // Reset the page to show the initial view, empty previous results
@@ -366,72 +430,6 @@ function resetView() {
     $('#js-error-message').empty();
     $('#js-loading-container').addClass('hidden');
     $('#js-post-count').empty();
-}
-
-// Check errors and return the appropriate info
-function errorCheck(error) {
-    console.log('`errorCheck` ran');
-    
-    if (error.message === "404" || error.message === "400") {
-        return "Blog could not be found.";
-    }
-    else {
-        return error.message;
-    }
-}
-
-// Watch for events in DOM
-function main() {
-    console.log('`main` ran');
-
-    // Watch for form submittals
-    $('#js-search-form').submit(async function () {
-        event.preventDefault();
-
-        // Get the blog name and desired max results that user entered
-        const searchName = $('#js-search-name').val();
-        const maxResults = $('#js-max-results').val();
-        // const platform = $('#js-platform').val();
-        
-        // Try to get post info to create results page
-        try {
-            // Hide search form, unhide loading container
-            $('#js-search-container').addClass('hidden');
-            $('#js-loading-container').removeClass('hidden');
-
-            // Get post content
-            const posts = await getPosts(searchName);
-
-            // Get video ID's from posts
-            let videoIds = parseYoutubeLinks(posts);
-
-            // Show videos found
-            displayResults(videoIds, maxResults);
-        }
-        // If API call failed, show error to user
-        catch (error) { 
-            const errorInfo = errorCheck(error);
-            $('#js-loading-container').addClass('hidden');
-            $('#js-error-message').text(`${errorInfo}`);
-            $('#js-error-container').removeClass('hidden');
-        }
-    });
-
-    // Watch for stop search button click
-    $('#js-stop-button').click(function () {
-        continueSearch = false;
-    })
-
-    // Watch for link clicks
-    $('#js-new-link').click(function () {
-        event.preventDefault();
-        resetView();
-    });
-
-    $('#js-error-reset-link').click(function () {
-        event.preventDefault();
-        resetView();
-    })
 }
 
 $(main());
