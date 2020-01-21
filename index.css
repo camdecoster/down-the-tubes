@@ -3,6 +3,7 @@
 :root {
   --font-1: 'Lato', sans-serif;
   --font-2: 'Montserrat', sans-serif;
+  --color-1: crimson;
 }
 
 body {
@@ -40,17 +41,17 @@ footer {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  background-color: crimson;
+  background-color: var(--color-1);
 }
 
 main {
+  width: 80%;
+  margin: 0 auto;
   font-family: var(--font-2);
-  margin-left: 10%;
-  margin-right: 10%;
+  /* margin-left: 10%;
+  margin-right: 10%; */
   margin-bottom: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
   /* overflow: auto; */
 }
 
@@ -58,13 +59,49 @@ main {
   height: 30px;
 }
 
-.search-name {
+.search-name {  
   width: 90%;
-  max-width: 500px;
+  min-width: 300px;
+}
+
+.platform,
+.max-results,
+.sort-method {
+  width: 45%;
+  min-width: 160px;
+  
+}
+
+
+.input {
+  box-sizing: border-box;
+  font-family: var(--font-2);
+  height: 26px;
+  border: 2px solid var(--color-1);
+  border-radius: 13px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: rgb(255, 225, 225);
+}
+
+.btn-search {
+  font-weight: bold;
+  color: white;
+  background-color: var(--color-1);
+}
+
+.btn-search:active {
+  background-color: darkred;
+  border-color: darkred;
+}
+
+.search-form label {
+  display: inline-block;
+  margin-bottom: 5px;
 }
 
 .error-container {
-  color: red;
+  color: var(--color-1);
   font-weight: bold;
 }
 
@@ -80,6 +117,12 @@ main {
 .search-results-list .yt-video {
   width: 250px;
   height: calc(250px / 1.6);
+}
+
+.loading-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .loader {
@@ -113,6 +156,10 @@ main {
 }
 
 @media screen and (min-width: 500px) {
+  main {
+    width: 400px;
+  }
+
   .search-results-list .yt-video {
     width: 400px;
     height: calc(400px / 1.6);
@@ -123,5 +170,53 @@ main {
   .search-results-list .yt-video {
     width: 650px;
     height: calc(650px / 1.6);
+  }
+}
+
+@media screen and (min-width: 900px) {
+  header {
+    
+    height: 100vh;
+    
+    flex-direction: column;
+    justify-content: start;
+  }
+
+  header h1 {
+    margin-right: 0px;
+  }
+
+  .logo {
+    height: 150px;
+  }
+
+  header,
+  footer,
+  .search-container {
+    width: 450px;
+    position: fixed;
+  }
+
+  main {
+    box-sizing: border-box;
+    width: calc(100% - 450px);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right:0;
+  }
+
+  .search-container {
+    box-sizing: border-box;
+    width: 450px;
+    height: calc((100vh - 225px));
+    padding-left: 20px;
+    padding-right: 20px;
+    top: 225px;
+    left: 0;
+    overflow: auto;
   }
 }

@@ -9,38 +9,64 @@
 </head>
 <body>
     <header>
-        <h1>DOWN THE TUBES</h1>
-        <img class="logo" src="images/escalator-into-tube.png" alt="person taking escalator into vertical tube">
+        <h1 id="js-title-heading" class="title-heading">DOWN THE TUBES</h1>
+        <a id="js-title-image" class="title-image" href="">
+            <img class="logo" src="images/escalator-into-tube.png" alt="person taking escalator into vertical tube" title="Go Down The Tubes Again">
+        </a>
     </header>
+    
     <main>
         <section id="js-search-container" class="search-container">
-            <p>As the "great" US Senator Ted Stevens once said about the internet, "It's a series of tubes." Indeed. Sometimes we post YouTube videos on Blogger and forget about them. This site aims to help you remember them. So, enjoy a walk, <i>Down The Tubes</i>.</p>
-            <form id="js-search-form">
+            <p>As the "great" US Senator Ted Stevens once said about the internet, "It's a series of tubes." Indeed. Sometimes we post YouTube videos on Blogger and forget about them. This site aims to help you remember them. It's easy:
+                <ol>
+                    <li>Enter the blog address</li>
+                    <li>Choose which company hosts the blog</li>
+                    <li>Type in how many videos you want to see</li>
+                    <li>Choose how to sort the videos</li>
+                </ol>
+                That's it. So, enjoy a walk, <i>Down The Tubes</i>.</p>
+            <form id="js-search-form" class="search-form">
                 <label for="js-search-name">Enter a Blogger URL:</label>
                 <br>
-                <input id="js-search-name" class="search-name" type="text" value="https://camsbrain.blogspot.com/" required />
+                <input id="js-search-name" class="search-name input" type="text" value="https://camsbrain.blogspot.com/" required />
                 <br>
                 <br>
-                <!-- <label for="js-platform">Select Blog Host:</label>
+                <label for="js-platform">Choose the blog host:</label>
                 <br>
-                <select id="js-platform">
+                <select id="js-platform" class="platform input">
                     <option value="blogger">Blogger</option>
+                    <option value="medium">Medium</option>
+                    <option value="tumblr">Tumblr</option>
                     <option value="wordpress">Wordpress</option>
                 </select>
-                <br> -->
-                <label for="js-max-results">Max Results</label>
-                <br>
-                <input id="js-max-results" type="number" value="10" required />
                 <br>
                 <br>
-                <input id="js-search" type="submit" value="Find Videos">
+                <label for="js-max-results">How many videos should be shown?</label>
+                <br>
+                <input id="js-max-results" class="max-results input" type="number" value="10" required />
+                <br>
+                <br>
+                <label for="js-sort-method">How should the videos be sorted?</label>
+                <br>
+                <select id="js-sort-method" class="sort-method input">
+                    <option value="oldest-posts">Oldest First</option>
+                    <option value="newest-posts">Newest First</option>
+                    <!-- <option value="oldest-videos">Oldest Videos First</option>
+                    <option value="newest-videos">Newest Videos First</option> -->
+                </select>
+                <br>
+                <br>
+                <input id="js-btn-search" class="btn-search input" type="submit" value="Find Videos">
             </form>
         </section>
+        
         <section id="js-loading-container" class="loading-container hidden">
-            <h2>Finding Blog Posts</h2>
-            <!-- <div class="loader"></div> -->
-            <p id="js-post-count"></p>
-            <button id="js-stop-button">Stop Search</button>
+            <div class="loading-items">
+                <h2>Finding Blog Posts</h2>
+                <div class="loader"></div>
+                <p id="js-post-count"></p>
+                <button id="js-stop-button">Stop Search</button>
+            </div>
         </section>
         <section id="js-error-container" class="error-container hidden">
             <p>There was an error:</p>
@@ -53,7 +79,8 @@
             <p><a id="js-playlist-link">LAUNCH PLAYLIST</a></p>
             <ol id="js-search-results-list" class="search-results-list">
             </ol>
-        </section>        
+        </section>
+        
     </main>
     <footer id="js-footer" class="hidden">
         <div class="footer-container">

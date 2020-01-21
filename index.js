@@ -29,10 +29,11 @@ function main() {
     $('#js-search-form').submit(async function () {
         event.preventDefault();
 
-        // Get the blog name and desired max results that user entered
+        // Get the user entered information
         const searchName = $('#js-search-name').val();
         const maxResults = $('#js-max-results').val();
-        // const platform = $('#js-platform').val();
+        const platform = $('#js-platform').val();
+        let sort = $('#js-sort-method').val();
         
         // Try to get post info to create results page
         try {
@@ -41,13 +42,13 @@ function main() {
             $('#js-loading-container').removeClass('hidden');
 
             // Get post content
-            const posts = await getPosts(searchName);
+            const posts = await getPosts(searchName, platform);
 
             // Get video ID's from posts
             let videoIds = parseYoutubeLinks(posts);
 
             // Show videos found
-            displayResults(videoIds, maxResults);
+            displayResults(videoIds, maxResults, sort);
         }
         // If API call failed, show error to user
         catch (error) { 
@@ -74,17 +75,26 @@ function main() {
         event.preventDefault();
         resetView();
     })
+
+    // Watch for title image click
+    $('#js-title-image').click(function () {
+        event.preventDefault();
+        resetView();
+    })
 }
 
 // Call selected site API to get post history for searchName. Calls platform
 // specific function after determining which platform is used.
-async function getPosts(searchName) {
+async function getPosts(searchName, platform) {
     console.log('`getPosts` ran')
-
     
     try {
         // CONSIDER ADDING HTTPS IF USER FORGETS
-        if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {            
+        // if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {            
+        //     const posts = await getBloggerPosts(searchName);
+        //     return posts;
+        // }
+        if (platform === 'blogger') {
             const posts = await getBloggerPosts(searchName);
             return posts;
         }
@@ -155,7 +165,7 @@ async function getBloggerPosts(searchName) {
 
             // Go through each post returned in postsInfo, get content and save it
             for (let i = 0; i < postsInfo.items.length; i++) {
-                posts.push(postsInfo.items[i].content);
+                posts.push(postsInfo.items[i]);
                 $('#js-post-count').text(`Found ${posts.length} Posts`);
             }
             pageCount++;
@@ -169,7 +179,7 @@ async function getBloggerPosts(searchName) {
         // Enable future searches in case stop button was clicked
         continueSearch = true;
 
-        // Return oldest posts by default        
+        // Return oldest posts by default
         return posts.reverse();
     }
     catch(error) {
@@ -218,30 +228,29 @@ function parseYoutubeLinks(posts) {
     // 3. https://www.youtube.com/embed/fGgfl71kfpE
     // 4. Shortened youtube URL's > use curl?
 
-    const videoIds = [];
-    //const search = true;
-    
+    const videoIds = [];    
 
     for (let i = 0; i < posts.length; i++) {
         // ADD URI DECODING?
+        const content = posts[i].content;
         let linkStart = 0;
         let searchPosition = 0;
         while (linkStart > -1) {
             // Search for YouTube URL in post
-            linkStart = posts[i].indexOf('youtube.com/', searchPosition);
+            linkStart = content.indexOf('youtube.com/', searchPosition);
 
             // Save first occurrence of YouTube URL to continue search after that point.
             // Some posts might have more than one URL.
             searchPosition = linkStart + 1;
 
             // Make sure post is long enough to hold shortest YouTube URL. If not, break loop.
-            if (posts[i].length < linkStart + 25) {
+            if (content.length < linkStart + 25) {
                 break;
             }
 
             // If URL found, get video ID
             if (linkStart > -1) {
-                let link = posts[i].slice(linkStart + 12); // Chop off youtube.com/
+                let link = content.slice(linkStart + 12); // Chop off youtube.com/
                 // Check for youtube links of the format:
                 // http://www.youtube.com/v/5KOs70Su_8s
                 if (link[0] === 'v') {
@@ -273,7 +282,7 @@ function parseYoutubeLinks(posts) {
 }
 
 // Display results in DOM
-async function displayResults(videoIds, maxResults) {
+async function displayResults(videoIds, maxResults, sort) {
     console.log('`displayResults` ran');
 
     // Grab the list container
@@ -288,6 +297,14 @@ async function displayResults(videoIds, maxResults) {
         let stopCount = (videoIds.length > maxResults) ? maxResults : videoIds.length;
         let videoCount = 0;
         //console.log('stopCount = ' + stopCount);
+
+        // Use proper sort for videos
+        if (sort === 'oldest-posts') {
+            // Do nothing, videos are already sorted that way
+        }
+        else if (sort === 'newest-posts') {
+            videoIds = videoIds.reverse();
+        }
         
         // For each ID in videoIds, get info about video, add to list item;
         for (let i = 0; i < stopCount; i++) {
