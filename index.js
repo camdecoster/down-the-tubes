@@ -21,6 +21,9 @@ const apiInfo = {
 // the stop search button.
 let continueSearch = true;
 
+// Track blog URL entered by user
+let searchName;
+
 // Watch for events in DOM
 function main() {
     console.log('`main` ran');
@@ -30,7 +33,7 @@ function main() {
         event.preventDefault();
 
         // Get the user entered information
-        const searchName = $('#js-search-name').val();
+        searchName = $('#js-search-name').val();
         const maxResults = $('#js-max-results').val();
         const platform = $('#js-platform').val();
         let sort = $('#js-sort-method').val();
@@ -38,7 +41,7 @@ function main() {
         // Try to get post info to create results page
         try {
             // Hide search form, unhide loading container
-            $('#js-search-container').addClass('hidden');
+            //$('#js-search-container').addClass('hidden');
             $('#js-loading-container').removeClass('hidden');
 
             // Get post content
@@ -339,7 +342,7 @@ async function displayResults(videoIds, maxResults, sort) {
                 i--;
             }
         }
-        $('#js-item-count').text(`${videoCount} Videos Found`);
+        $('#js-item-count').append(`${videoCount} videos found at:<br><a href="${searchName}">${searchName}</a>`);
 
         // Create playlist link
         $('#js-playlist-link').attr('href', generateYoutubePlaylist(videoIds));
@@ -437,8 +440,8 @@ function errorCheck(error) {
 function resetView() {
     console.log('`resetView` ran');
 
-    $('#js-search-name').val('');
-    $('#js-max-results').val('10');
+    //$('#js-search-name').val('');
+    //$('#js-max-results').val('10');
     $('#js-search-container').removeClass('hidden');
     $('#js-footer').addClass('hidden');
     $('#js-search-results').addClass('hidden');
