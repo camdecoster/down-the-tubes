@@ -40,10 +40,16 @@ function main() {
         
         // Try to get post info to create results page
         try {
-            // Hide search form, unhide loading container
-            //$('#js-search-container').addClass('hidden');
-            $('#js-loading-container').removeClass('hidden');
+            // Hide intro, results, errors
+            $('#js-search-results').addClass('hidden');
+            $('#js-search-results-list').empty();
+            $('#js-error-container').addClass('hidden');
+            $('#js-error-message').empty();
 
+            // Unhide loading container
+            $('#js-intro-container').addClass('hidden');
+            $('#js-loading-container').removeClass('hidden');
+            
             // Get post content
             const posts = await getPosts(searchName, platform);
 
@@ -74,16 +80,25 @@ function main() {
     });
 
     // Watch for Try Again button click after error
-    $('#js-error-reset-link').click(function () {
+    $('#js-btn-error-reset').click(function () {
         event.preventDefault();
         resetView();
     })
 
-    // Watch for title image click
-    $('#js-title-image').click(function () {
+    // Watch for title link clicks
+    $('.title-link').click(function () {
         event.preventDefault();
         resetView();
     })
+
+    // Watch for options button click
+    $('#js-link-options').click(function () {
+        const options = $('#js-link-options');
+        event.preventDefault();
+        // Change arrow to up/down if it's the opposite direction
+        (options.text().slice(-1) === '▼') ? options.text('OPTIONS ▲') : options.text('OPTIONS ▼');
+        $('#js-search-options').toggleClass('hidden');
+    });
 }
 
 // Call selected site API to get post history for searchName. Calls platform
@@ -174,7 +189,7 @@ async function getBloggerPosts(searchName) {
             pageCount++;
 
             // If pageCount grows too high (from a blog with lots of posts), break loop
-            if (pageCount > 100) {
+            if (pageCount > 500) {
                 break;
             }
         }
@@ -325,7 +340,6 @@ async function displayResults(videoIds, maxResults, sort) {
                     <br>
                     ${videoInfo.title}
                     <br>
-                    <br>                    
                     <a href="https://www.youtube.com/watch?v=${videoIds[i]}">https://www.youtube.com/watch?v=${videoIds[i]}</a>
                     <br>
                     <br>
@@ -342,6 +356,7 @@ async function displayResults(videoIds, maxResults, sort) {
                 i--;
             }
         }
+        $('#js-item-count').empty();
         $('#js-item-count').append(`${videoCount} videos found at:<br><a href="${searchName}">${searchName}</a>`);
 
         // Create playlist link
@@ -354,7 +369,7 @@ async function displayResults(videoIds, maxResults, sort) {
 
     // Hide loading container, unhide results list, footer
     $('#js-loading-container').addClass('hidden');
-    $('#js-footer').removeClass('hidden');
+    //$('#js-footer').removeClass('hidden');
     $('#js-search-results').removeClass('hidden');
     
 
@@ -442,8 +457,8 @@ function resetView() {
 
     //$('#js-search-name').val('');
     //$('#js-max-results').val('10');
-    $('#js-search-container').removeClass('hidden');
-    $('#js-footer').addClass('hidden');
+    $('#js-intro-container').removeClass('hidden');
+    //$('#js-footer').addClass('hidden');
     $('#js-search-results').addClass('hidden');
     $('#js-search-results-list').empty();
     $('#js-error-container').addClass('hidden');

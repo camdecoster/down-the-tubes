@@ -10,16 +10,56 @@
 <body>
     <header>
         <section id="js-title-container" class="title-container">
-            <h1 id="js-title-heading" class="title-heading">Down The Tubes</h1>
-            <a id="js-title-image" class="title-image" href="">
+            <a class ="title-link" href="">
+                <h1 id="js-title-heading" class="title-heading">Down The Tubes</h1>
+            </a>
+            <a id="js-title-image" class="title-link" href="">
                 <img class="logo" src="images/escalator-into-tube.png" alt="person taking escalator into vertical tube" title="Go Down The Tubes Again">
             </a>
         </section>
         <p class="quote"><i>"It's a series of tubes."   Senator Ted Stevens</i></p>
+        <form id="js-search-form" class="search-form">
+            <div id="js-search-main" class="search-main">
+                <div class="search-main-top">
+                    <div class="search-name-container">
+                        <label for="js-search-name">Blog URL:</label>
+                        <input id="js-search-name" class="search-name input" type="text" value="https://camsbrain.blogspot.com/" required />
+                    </div>
+                    <div class="platform-container">
+                        <label for="js-platform">Blog host:</label>
+                        <select id="js-platform" class="platform input">
+                            <option value="blogger">Blogger</option>
+                            <!-- <option value="medium">Medium</option>
+                            <option value="tumblr">Tumblr</option>
+                            <option value="wordpress">Wordpress</option> -->
+                        </select>
+                    </div>
+                </div>
+                <div id="js-btn-container" class="btn-container">
+                    <input id="js-btn-search" class="btn-search input btn" type="submit" value="Find Videos">
+                    <a id="js-link-options" class="link-options" href="">OPTIONS ▼</a>
+                </div>
+            </div>
+            <div id="js-search-options" class="search-options hidden">
+                <div class="search-options-row">
+                    <label for="js-max-results">How many videos should be shown?</label>
+                    <input id="js-max-results" class="max-results input" type="number" value="10" required />
+                </div>
+                <div class="search-options-row">
+                    <label for="js-sort-method">How should the videos be sorted?</label>
+                    <select id="js-sort-method" class="sort-method input">
+                        <option value="oldest-posts">Oldest First</option>
+                        <option value="newest-posts">Newest First</option>
+                        <!-- <option value="oldest-videos">Oldest Videos First</option>
+                        <option value="newest-videos">Newest Videos First</option> -->
+                    </select>
+                </div>
+            </div>
+            
+        </form>
     </header>
-    
     <main>
-        <section id="js-search-container" class="search-container">
+        <section id="js-intro-container" class="intro-container">
             <p>Sometimes we post YouTube videos on Blogger and forget about them. This site aims to help you remember them. It's easy:
                 <ol>
                     <li>Enter the blog address</li>
@@ -27,39 +67,7 @@
                     <li>Click Find Videos</li>
                 </ol>
                 That's it. So, enjoy a walk, <i>Down The Tubes</i>.</p>
-            <form id="js-search-form" class="search-form">
-                <label for="js-search-name">Enter a Blogger URL:</label>
-                <br>
-                <input id="js-search-name" class="search-name input" type="text" value="https://camsbrain.blogspot.com/" required />
-                <br>
-                <br>
-                <label for="js-platform">Choose the blog host:</label>
-                <br>
-                <select id="js-platform" class="platform input">
-                    <option value="blogger">Blogger</option>
-                    <!-- <option value="medium">Medium</option>
-                    <option value="tumblr">Tumblr</option>
-                    <option value="wordpress">Wordpress</option> -->
-                </select>
-                <br>
-                <br>
-                <label for="js-max-results">How many videos should be shown?</label>
-                <br>
-                <input id="js-max-results" class="max-results input" type="number" value="10" required />
-                <br>
-                <br>
-                <label for="js-sort-method">How should the videos be sorted?</label>
-                <br>
-                <select id="js-sort-method" class="sort-method input">
-                    <option value="oldest-posts">Oldest First</option>
-                    <option value="newest-posts">Newest First</option>
-                    <!-- <option value="oldest-videos">Oldest Videos First</option>
-                    <option value="newest-videos">Newest Videos First</option> -->
-                </select>
-                <br>
-                <br>
-                <input id="js-btn-search" class="btn-search input" type="submit" value="Find Videos">
-            </form>
+            
         </section>
         <section id="js-output-container" class="output-container">
             <section id="js-loading-container" class="loading-container hidden">
@@ -67,13 +75,13 @@
                     <h2>Finding Blog Posts</h2>
                     <div class="loader"></div>
                     <p id="js-post-count"></p>
-                    <button id="js-stop-button">Stop Search</button>
+                    <button id="js-btn-stop" class="btn-stop input btn">Stop Search</button>
                 </div>
             </section>
             <section id="js-error-container" class="error-container hidden">
                 <p>There was an error:</p>
                 <p id="js-error-message" class="error-message"></p>
-                <button id="js-error-reset-link">Try Again</button>
+                <button id="js-btn-error-reset" class="btn-error-reset input btn">Try Again</button>
             </section>
             <section id="js-search-results" class="search-results hidden">
                 <h2>Search Results</h2>
@@ -85,13 +93,6 @@
             </section>
         </section>
     </main>
-    <footer id="js-footer" class="hidden">
-        <div class="footer-container">
-            <a id="js-new-link" href="">NEW SEARCH</a>
-            <!-- <a id="js-sort-link">SORT</a>
-            <a id="js-share-link">SHARE</a> -->
-        </div>
-    </footer>
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
     <!-- <script src="jquery-3.3.1.js"></script> -->
     <script src="index.js"></script>
