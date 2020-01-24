@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Color address bar for Chrome, Firefox, Opera -->
+    <meta name="theme-color" content="rgb(0, 148, 255)">
     <title>Down The Tubes</title>
     <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="images/favicon.ico" sizes="16x16 24x24 32x32 64x64" type="image/png">
 </head>
 <body>
     <header>
@@ -38,27 +41,21 @@
                     <label for="js-platform">Blog host:</label>
                     <select id="js-platform" class="platform input">
                         <option value="blogger">Blogger</option>
-                        <!-- <option value="medium">Medium</option>
-                        <option value="tumblr">Tumblr</option>
-                        <option value="wordpress">Wordpress</option> -->
                     </select>
-                </div>
-                <div class="search-options-row">
-                    <label for="js-max-results">How many videos should be shown?</label>
-                    <input id="js-max-results" class="max-results input" type="number" value="10" required />
                 </div>
                 <div class="search-options-row">
                     <label for="js-sort-method">How should the videos be sorted?</label>
                     <select id="js-sort-method" class="sort-method input">
                         <option value="oldest-posts">Oldest First</option>
                         <option value="newest-posts">Newest First</option>
-                        <!-- <option value="oldest-videos">Oldest Videos First</option>
-                        <option value="newest-videos">Newest Videos First</option> -->
                     </select>
                 </div>
+                <div class="search-options-row">
+                    <label for="js-max-results">How many videos should be shown?</label>
+                    <input id="js-max-results" class="max-results input" type="number" value="10" required />
+                </div>                
                 <div class="about-links">
                     <a href="about.html">ABOUT</a>
-                    <a href="https://github.com/camdecoster/down-the-tubes">GITHUB</a>
                 </div>
             </div>
             
@@ -100,7 +97,6 @@
         </section>
     </main>
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-    <!-- <script src="jquery-3.3.1.js"></script> -->
     <script src="index.js"></script>
 </body>
 </html>

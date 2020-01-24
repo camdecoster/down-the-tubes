@@ -108,21 +108,10 @@ async function getPosts(searchName, platform) {
     console.log('`getPosts` ran')
     
     try {
-        // CONSIDER ADDING HTTPS IF USER FORGETS
-        // if (searchName.search('blogger') > -1 || searchName.search('blogspot') > -1) {            
-        //     const posts = await getBloggerPosts(searchName);
-        //     return posts;
-        // }
         if (platform === 'blogger') {
             const posts = await getBloggerPosts(searchName);
             return posts;
         }
-        // else if (searchName.search('tumblr') > -1) {
-        //     // Add logic for tumblr blogs
-        // }
-        // else if (searchName.search('wordpress.com') > -1) {
-        //     // Add logic for Wordpress blogs
-        // }
         else {
             throw new Error('Not a Blogger URL');
         }
@@ -133,7 +122,6 @@ async function getPosts(searchName, platform) {
 }
 
 // Get posts from Blogger blog
-// CURRENTLY STOPS AFTER 100 POSTS FOUND
 async function getBloggerPosts(searchName) {
     console.log('`getBloggerPosts` ran');
 
@@ -190,7 +178,7 @@ async function getBloggerPosts(searchName) {
             pageCount++;
 
             // If pageCount grows too high (from a blog with lots of posts), break loop
-            if (pageCount > 500) {
+            if (pageCount > 500) { // This will get a max of 5000 posts
                 break;
             }
         }
@@ -216,6 +204,7 @@ async function getApiData(queryParameters, siteUrl) {
     try {
         // Get info from API
         const response = await fetch(url);
+
         // Make sure response is OK before proceeding
         if (!response.ok) {
             throw new Error(response.status);
@@ -233,7 +222,6 @@ function formatQueryParameters(queryParameters) {
 
     const parameterString = Object.keys(queryParameters)
         .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(queryParameters[key])}`);
-    // console.log('parameterString = ' + parameterString);
     return parameterString.join('&');
 }
 
@@ -245,12 +233,11 @@ function parseYoutubeLinks(posts) {
     // 1. http://www.youtube.com/v/5KOs70Su_8s&amp;hl=en&amp;fs=1
     // 2. https://www.youtube.com/watch?v=pMmn3vrCOx4
     // 3. https://www.youtube.com/embed/fGgfl71kfpE
-    // 4. Shortened youtube URL's > use curl?
+    // 4. Shortened youtube URL's (FUTURE)
 
     const videoIds = [];    
 
     for (let i = 0; i < posts.length; i++) {
-        // ADD URI DECODING?
         const content = posts[i].content;
         let linkStart = 0;
         let searchPosition = 0;
@@ -274,7 +261,6 @@ function parseYoutubeLinks(posts) {
                 // http://www.youtube.com/v/5KOs70Su_8s
                 if (link[0] === 'v') {
                     link = link.slice(2, 13); // Chop off 'v/', end after video ID
-                    console.log(link);
                 }
                 // If not above format, then assume following format:
                 // https://www.youtube.com/watch?v=pMmn3vrCOx4
@@ -296,7 +282,6 @@ function parseYoutubeLinks(posts) {
         }
     }
 
-    console.log('videoIds = ' + videoIds);
     return videoIds;
 }
 
@@ -315,7 +300,7 @@ async function displayResults(videoIds, maxResults, sort) {
         // Stop going through ID's once max results listed
         let stopCount = (videoIds.length > maxResults) ? maxResults : videoIds.length;
         let videoCount = 0;
-        //console.log('stopCount = ' + stopCount);
+        let videosSkipped = 0;
 
         // Use proper sort for videos
         if (sort === 'oldest-posts') {
@@ -351,14 +336,27 @@ async function displayResults(videoIds, maxResults, sort) {
             // If video is unavailable, remove ID from list, adjust counter variables accordingly
             else {
                 videoIds.splice(i, 1);
+                videosSkipped++;
                 // Decrement stopCount so loop doesn't go on forever
                 stopCount--;
                 // Decrement i so ID's don't get skipped
                 i--;
             }
         }
+
+        // Display info on videos found, skipped
         $('#js-item-count').empty();
-        $('#js-item-count').append(`${videoCount} videos found at:<br><a href="${searchName}">${searchName}</a>`);
+        $('#js-item-count').append(
+            `${videoCount} videos found at:
+            <br>
+            <a href="${searchName}">${searchName}</a>`
+        );
+        if (videosSkipped > 0) {
+            $('#js-item-count').append(
+                `<br>
+                ${videosSkipped} ${(videosSkipped > 1) ? 'videos were' : 'video was'} no longer available.`
+            );
+        }
 
         // Create playlist link
         $('#js-playlist-link').attr('href', generateYoutubePlaylist(videoIds));
@@ -368,9 +366,8 @@ async function displayResults(videoIds, maxResults, sort) {
         list.append('<li>No videos could be found at the blog you entered.</li>');
     }
 
-    // Hide loading container, unhide results list, footer
+    // Hide loading container, unhide results list
     $('#js-loading-container').addClass('hidden');
-    //$('#js-footer').removeClass('hidden');
     $('#js-search-results').removeClass('hidden');
     
 
@@ -420,7 +417,6 @@ function generateYoutubeEmbed(videoId) {
 // Create link to youtube playlist of videos found
 function generateYoutubePlaylist(videoIds) {
     // This method of generating a playlist will max out at 50 videos.
-    // Consider creating multiple links?
     console.log('`generateYoutubePlaylist` ran');
 
     const ytUrl = 'https://www.youtube.com/watch_videos';
@@ -432,11 +428,7 @@ function generateYoutubePlaylist(videoIds) {
     }
     const parameterString = formatQueryParameters(queryParameters);
     const url = ytUrl + '?' + parameterString;
-    // Is there a way to get the redirect URL from fetch() without following?
 
-    // const response = await fetch(url, options);
-    // console.log(response);
-    // const playlistUrl = await response.json();
     return url;
 }
 
@@ -456,10 +448,7 @@ function errorCheck(error) {
 function resetView() {
     console.log('`resetView` ran');
 
-    //$('#js-search-name').val('');
-    //$('#js-max-results').val('10');
     $('#js-intro-container').removeClass('hidden');
-    //$('#js-footer').addClass('hidden');
     $('#js-search-results').addClass('hidden');
     $('#js-search-results-list').empty();
     $('#js-error-container').addClass('hidden');
