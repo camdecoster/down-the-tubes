@@ -4,7 +4,7 @@
   --font-1: 'Cantata One', serif;
   --font-2: 'Open Sans', sans-serif;
   --dark: rgb(0, 56, 141);
-  --medium: rgb(0, 148, 255);
+  --medium: rgb(0, 131, 224);
   --light: rgb(173, 203, 227);
   --lighter: rgb(255, 255, 255);
   --accent: #ffbb00;
@@ -43,7 +43,6 @@ header {
   background-color: var(--medium);
   font-family: var(--font-1);
   font-size: 12px;
-  font-weight: bold;
   color: var(--lighter);
 }
 
@@ -159,7 +158,7 @@ header h1 {
 .link-options {
   font-size: 12px;
   text-decoration: none;
-  color: var(--dark);
+  color: var(--lighter);
 }
 
 .search-options {
@@ -184,7 +183,7 @@ header h1 {
 }
 
 .about-links a {
-  color: var(--dark);
+  color: var(--lighter);
 }
 
 .about-links a:active {
