@@ -14,7 +14,7 @@
                 <h1 id="js-title-heading" class="title-heading">Down The Tubes</h1>
             </a>
             <a id="js-title-image" class="title-link" href="">
-                <img class="logo" src="images/escalator-into-tube.png" alt="person taking escalator into vertical tube" title="Go Down The Tubes Again">
+                <img class="logo" src="images/falling-into-tube.png" alt="person falling into vertical tube" title="Go Down The Tubes Again">
             </a>
         </section>
         <p class="quote"><i>"It's a series of tubes."   Senator Ted Stevens</i></p>
@@ -24,23 +24,25 @@
                     <div class="search-name-container">
                         <label for="js-search-name">Blog URL:</label>
                         <input id="js-search-name" class="search-name input" type="text" value="https://camsbrain.blogspot.com/" required />
+                        <input id="js-btn-search" class="btn-search input btn" type="submit" value="GO">
                     </div>
-                    <div class="platform-container">
-                        <label for="js-platform">Blog host:</label>
-                        <select id="js-platform" class="platform input">
-                            <option value="blogger">Blogger</option>
-                            <!-- <option value="medium">Medium</option>
-                            <option value="tumblr">Tumblr</option>
-                            <option value="wordpress">Wordpress</option> -->
-                        </select>
-                    </div>
+                    
                 </div>
                 <div id="js-btn-container" class="btn-container">
-                    <input id="js-btn-search" class="btn-search input btn" type="submit" value="Find Videos">
+                    
                     <a id="js-link-options" class="link-options" href="">OPTIONS ▼</a>
                 </div>
             </div>
             <div id="js-search-options" class="search-options hidden">
+                <div class="search-options-row">
+                    <label for="js-platform">Blog host:</label>
+                    <select id="js-platform" class="platform input">
+                        <option value="blogger">Blogger</option>
+                        <!-- <option value="medium">Medium</option>
+                        <option value="tumblr">Tumblr</option>
+                        <option value="wordpress">Wordpress</option> -->
+                    </select>
+                </div>
                 <div class="search-options-row">
                     <label for="js-max-results">How many videos should be shown?</label>
                     <input id="js-max-results" class="max-results input" type="number" value="10" required />
@@ -53,6 +55,10 @@
                         <!-- <option value="oldest-videos">Oldest Videos First</option>
                         <option value="newest-videos">Newest Videos First</option> -->
                     </select>
+                </div>
+                <div class="about-links">
+                    <a href="about.html">ABOUT</a>
+                    <a href="https://github.com/camdecoster/down-the-tubes">GITHUB</a>
                 </div>
             </div>
             
@@ -87,14 +93,14 @@
                 <h2>Search Results</h2>
                 <p id="js-site-url" class="site-url"></p>
                 <p id="js-item-count" class="item-count"></p>
-                <p><a id="js-playlist-link">LAUNCH PLAYLIST</a></p>
+                <p><a id="js-playlist-link" class="playlist-link">LAUNCH PLAYLIST</a></p>
                 <ol id="js-search-results-list" class="search-results-list">
                 </ol>
             </section>
         </section>
     </main>
-    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-    <!-- <script src="jquery-3.3.1.js"></script> -->
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script> -->
+    <script src="jquery-3.3.1.js"></script>
     <script src="index.js"></script>
 </body>
 </html>

@@ -69,7 +69,7 @@ function main() {
     });
 
     // Watch for stop search button click
-    $('#js-stop-button').click(function () {
+    $('#js-btn-stop').click(function () {
         continueSearch = false;
     })
 
@@ -95,6 +95,7 @@ function main() {
     $('#js-link-options').click(function () {
         const options = $('#js-link-options');
         event.preventDefault();
+        
         // Change arrow to up/down if it's the opposite direction
         (options.text().slice(-1) === '▼') ? options.text('OPTIONS ▲') : options.text('OPTIONS ▼');
         $('#js-search-options').toggleClass('hidden');
