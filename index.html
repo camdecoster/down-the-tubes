@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- Color address bar for Chrome, Firefox, Opera -->
-    <meta name="theme-color" content="rgb(0, 131, 224)">
+    <!-- Color address bar for mobile Chrome, Firefox, Opera -->
+    <meta name="theme-color" content="rgb(0, 119, 204)">
     <title>Down The Tubes</title>
     <link rel="stylesheet" href="index.css">
     <link rel="icon" href="images/favicon.ico" sizes="16x16 24x24 32x32 64x64" type="image/vnd.microsoft.icon">
@@ -17,26 +17,24 @@
                 <h1 id="js-title-heading" class="title-heading">Down The Tubes</h1>
             </a>
             <a id="js-title-image" class="title-link" href="">
-                <img class="logo" src="images/falling-into-tube.png" alt="person falling into vertical tube" title="Go Down The Tubes Again">
+                <img class="logo" src="images/falling-into-tube-128.png" alt="person falling into vertical tube" title="Go Down The Tubes Again">
             </a>
         </section>
         <p class="quote"><i>"It's a series of tubes."   Senator Ted Stevens</i></p>
         <form id="js-search-form" class="search-form">
-            <div id="js-search-main" class="search-main">
+            <section id="js-search-main" class="search-main">
                 <div class="search-main-top">
                     <div class="search-name-container">
                         <label for="js-search-name">Blog URL:</label>
                         <input id="js-search-name" class="search-name input" type="text" value="https://camsbrain.blogspot.com/" required />
                         <input id="js-btn-search" class="btn-search input btn" type="submit" value="GO">
                     </div>
-                    
                 </div>
                 <div id="js-btn-container" class="btn-container">
-                    
                     <a id="js-link-options" class="link-options" href="">OPTIONS ▼</a>
                 </div>
-            </div>
-            <div id="js-search-options" class="search-options hidden">
+            </section>
+            <section id="js-search-options" class="search-options hidden">
                 <div class="search-options-row">
                     <label for="js-platform">Blog host:</label>
                     <select id="js-platform" class="platform input">
@@ -57,19 +55,19 @@
                 <div class="about-links">
                     <a href="about.html">ABOUT</a>
                 </div>
-            </div>
-            
+            </section>
         </form>
     </header>
     <main>
         <section id="js-intro-container" class="intro-container">
-            <p>Sometimes we post YouTube videos on Blogger and forget about them. This site aims to help you remember them. It's easy:
-                <ol>
-                    <li>Enter the blog address</li>
-                    <li>Choose your search options</li>
-                    <li>Click Find Videos</li>
-                </ol>
-                That's it. So, enjoy a walk, <i>Down The Tubes</i>.</p>
+            <h3>Welcome to Down The Tubes</h3>
+            <p>Sometimes we post YouTube videos on Blogger and forget about them. This site aims to help you remember them. It's easy:</p>
+            <ol>
+                <li>Enter the blog address</li>
+                <li>Choose your search options</li>
+                <li>Click Find Videos</li>
+            </ol>
+            <p>That's it. So, enjoy a walk, <i>Down The Tubes</i>.</p>
             
         </section>
         <section id="js-output-container" class="output-container">
@@ -82,7 +80,7 @@
                 </div>
             </section>
             <section id="js-error-container" class="error-container hidden">
-                <p>There was an error:</p>
+                <h3>There was an error:</h3>
                 <p id="js-error-message" class="error-message"></p>
                 <button id="js-btn-error-reset" class="btn-error-reset input btn">Try Again</button>
             </section>

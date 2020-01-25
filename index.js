@@ -314,21 +314,14 @@ async function displayResults(videoIds, maxResults, sort) {
         for (let i = 0; i < stopCount; i++) {
             // Get video info for each ID
             const videoInfo = await getVideoInfo(videoIds[i]);
-            console.log('Title is ' + videoInfo.title);
+            
             // Only display if video info is available
             if (videoInfo.title !== 'Video Unavailable') {
-                console.log(videoInfo);
-            
                 // Add video info as list item
                 list.append(`
                 <li>
+                    <a href="https://www.youtube.com/watch?v=${videoIds[i]}">${videoInfo.title}</a>
                     ${generateYoutubeEmbed(videoIds[i])}
-                    <br>
-                    ${videoInfo.title}
-                    <br>
-                    <a href="https://www.youtube.com/watch?v=${videoIds[i]}">https://www.youtube.com/watch?v=${videoIds[i]}</a>
-                    <br>
-                    <br>
                 </li>`
                 );
                 videoCount++;

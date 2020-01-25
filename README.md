@@ -1,5 +1,5 @@
 # Down The Tubes
-![alt text](https://raw.githubusercontent.com/camdecoster/down-the-tubes/master/images/screenshot.png "Down The Tubes Screenshot")
+![alt text](https://raw.githubusercontent.com/camdecoster/down-the-tubes/master/images/dtt_frontpage_large.png "Down The Tubes Screenshot")
 Down The Tubes (DTT) is a web app designed to surface YouTube videos that a user posted some time ago on their Blogger blog. DTT works as follows:
 1. User enters Blogger address and sets the search options and clicks the search button
 2. Query the Blogger API to get the old post content
